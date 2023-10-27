@@ -1,2 +1,3 @@
 rootProject.name = "prefab-android"
 include ':app'
+include ':prefab-lame'
