@@ -1,0 +1,43 @@
+apply plugin: 'maven-publish'
+
+File mavenPublishFile = file("${project.getProjectDir()}/gradle.properties")
+def gradleProperties = new Properties()
+mavenPublishFile.withInputStream { stream ->
+    gradleProperties.load(stream)
+}
+
+publishing {
+    publications {
+        myPulication(MavenPublication) {
+            groupId = gradleProperties.getProperty("GROUP")
+            artifactId = gradleProperties.getProperty("POM_ARTIFACT_ID")
+            version = gradleProperties.getProperty("VERSION_NAME")
+            //指定构建的aar文件路径
+            artifact("$rootDir/prefab-lame/libs/lame-3.100.0.aar")
+            pom {
+                name = gradleProperties.getProperty("POM_NAME")
+                description = gradleProperties.getProperty("POM_DESCRIPTION")
+                url = gradleProperties.getProperty("POM_URL")
+                licenses {
+                    license {
+                        name = gradleProperties.getProperty("POM_LICENCE_NAME")
+                        url = gradleProperties.getProperty("POM_URL")
+                        distribution = gradleProperties.getProperty("POM_LICENCE_URL")
+                    }
+                }
+                developers {
+                    developer {
+                        id = 'byhook'
+                        name = 'byhook'
+                        email = 'byhook@163.com'
+                    }
+                }
+                scm {
+                    connection = gradleProperties.getProperty("POM_SCM_CONNECTION")
+                    developerConnection = gradleProperties.getProperty("POM_SCM_DEV_CONNECTION")
+                    url = gradleProperties.getProperty("POM_SCM_URL")
+                }
+            }
+        }
+    }
+}
