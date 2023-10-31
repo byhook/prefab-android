@@ -4,7 +4,7 @@ plugins {
     id 'kotlin-kapt'
     id 'kotlin-parcelize'
 }
-apply from: "$rootDir/maven-prefab.gradle"
+apply from: "$rootDir/maven-publish.gradle"
 
 android {
     compileSdkVersion versions.compileSdk

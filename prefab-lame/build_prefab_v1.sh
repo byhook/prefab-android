@@ -5,6 +5,8 @@
 #参考文档
 #https://developer.android.com/studio/build/native-dependencies?hl=zh-cn&buildsystem=ndk-build
 
+bash build_lame.sh
+
 #库名称：lib${LIB_NAME}.so
 LIB_NAME=lame
 #版本号：必须全数字
@@ -12,9 +14,9 @@ VERSION=3.100.0
 
 ABIS=("arm64-v8a" "armeabi-v7a" "x86_64" "x86")
 
-TARGET_BUILD_DIR=$(pwd)/lame-3.100/build
+TARGET_BUILD_DIR=$(pwd)/build/lame-3.100/build
 
-TARGET_ROOT_PREFAB_DIR=$(pwd)/build-prefab
+TARGET_ROOT_PREFAB_DIR=$(pwd)/build/build-prefab
 
 rm -rf $TARGET_ROOT_PREFAB_DIR
 
@@ -22,7 +24,7 @@ TARGET_PREFAB_DIR=$TARGET_ROOT_PREFAB_DIR/prefab
 mkdir -p $TARGET_PREFAB_DIR
 
 #拷贝清单文件
-MANIFEST_PATH=$(pwd)/AndroidManifest.xml
+MANIFEST_PATH=$(pwd)/src/main/AndroidManifest.xml
 
 function copy_libs {
   TARGET_ABI=$1
@@ -32,7 +34,8 @@ function copy_libs {
   mkdir -p $TARGET_ANDROID_ABI_DIR
 
   # 复制目标文件
-  cp -R $TARGET_BUILD_DIR/libs/$TARGET_ABI/*.$SUFFIX_NAME $TARGET_ANDROID_ABI_DIR/
+  cp -R $TARGET_BUILD_DIR/libs/$TARGET_ABI/*.$SUFFIX_NAME \
+      $TARGET_ANDROID_ABI_DIR/lib$LIB_NAME.$SUFFIX_NAME
 
   # 生成abi.json文件
   # 配置目录 prefab/modules/$libName/libs/android.$abi/abi.json
@@ -86,8 +89,8 @@ function package_library {
 
   echo 当前目录是：""$(pwd)
 
-  zip -r $LIB_NAME-$VERSION.aar . 2>/dev/null
-  zip -Tv $LIB_NAME-$VERSION.aar 2>/dev/null
+  zip -r output.aar . 2>/dev/null
+  zip -Tv output.aar 2>/dev/null
 
   # Verify that the aar contents are correct (see output below to verify)
   result=$?
@@ -98,7 +101,7 @@ function package_library {
     exit 1
   fi
 
-  mv $LIB_NAME-$VERSION.aar ..
+  mv output.aar ..
 }
 
 # 进入build-prefab目录

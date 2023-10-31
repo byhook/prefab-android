@@ -6,6 +6,8 @@ mavenPublishFile.withInputStream { stream ->
     gradleProperties.load(stream)
 }
 
+println("====================> ${System.getProperty("hello")} ${project.buildDir}")
+
 publishing {
     publications {
         myPulication(MavenPublication) {
@@ -13,7 +15,7 @@ publishing {
             artifactId = gradleProperties.getProperty("POM_ARTIFACT_ID")
             version = gradleProperties.getProperty("VERSION_NAME")
             //指定构建的aar文件路径
-            artifact("$rootDir/prefab-lame/libs/lame-3.100.0.aar")
+            artifact("${project.buildDir}/output.aar")
             pom {
                 name = gradleProperties.getProperty("POM_NAME")
                 description = gradleProperties.getProperty("POM_DESCRIPTION")
