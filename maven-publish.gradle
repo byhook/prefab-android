@@ -6,14 +6,28 @@ mavenPublishFile.withInputStream { stream ->
     gradleProperties.load(stream)
 }
 
-println("====================> ${System.getProperty("hello")} ${project.buildDir}")
+void runCommand(String command) {
+    def out = new ByteArrayOutputStream()
+    println("runCommand: " + command)
+    exec {
+        ExecSpec execSpec ->
+            executable 'bash'
+            args '-c', command
+            standardOutput = out
+            errorOutput = out
+    }
+    String output = out.toString().trim()
+    println("-> output: " + output)
+}
 
 publishing {
     publications {
-        myPulication(MavenPublication) {
+        prefabPublish(MavenPublication) {
             groupId = gradleProperties.getProperty("GROUP")
             artifactId = gradleProperties.getProperty("POM_ARTIFACT_ID")
             version = gradleProperties.getProperty("VERSION_NAME")
+            //先构建aar文件
+            runCommand("bash build_prefab_v2.sh")
             //指定构建的aar文件路径
             artifact("${project.buildDir}/output.aar")
             pom {
