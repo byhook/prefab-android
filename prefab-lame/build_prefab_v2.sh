@@ -128,7 +128,8 @@ function package_library {
         exit 1
     fi
 
-    mv output.aar ..
+    mkdir -p ../../aar
+    mv output.aar ../../aar
 }
 
 # 进入build-prefab目录

@@ -20,16 +20,23 @@ void runCommand(String command) {
     println("-> output: " + output)
 }
 
+tasks.register("prefabPublish", Copy) {
+    //构建aar文件
+    runCommand("bash build_prefab_v2.sh")
+    //指定文件
+    outputs.file("${project.projectDir}/aar/output.aar")
+}
+
 publishing {
     publications {
         prefabPublish(MavenPublication) {
             groupId = gradleProperties.getProperty("GROUP")
             artifactId = gradleProperties.getProperty("POM_ARTIFACT_ID")
             version = gradleProperties.getProperty("VERSION_NAME")
-            //先构建aar文件
-            runCommand("bash build_prefab_v2.sh")
             //指定构建的aar文件路径
-            artifact("${project.buildDir}/output.aar")
+            //artifact("${project.buildDir}/output.aar")
+            //指定构建aar文件的任务
+            artifact tasks.named("prefabPublish")
             pom {
                 name = gradleProperties.getProperty("POM_NAME")
                 description = gradleProperties.getProperty("POM_DESCRIPTION")
