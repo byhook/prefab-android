@@ -4,10 +4,9 @@ plugins {
     id 'kotlin-kapt'
     id 'kotlin-parcelize'
 }
-apply from: "$rootDir/maven-publish.gradle"
 
 android {
-    namespace "io.github.byhook.prefab.lame"
+    namespace "io.github.byhook.prefab.ffmpeg"
     compileSdkVersion versions.compileSdk
 
     defaultConfig {
@@ -33,11 +32,6 @@ android {
     }
     buildFeatures {
         prefabPublishing true
-    }
-    prefab {
-        lame {
-            headers "src/main/cpp/include"
-        }
     }
 }
 
