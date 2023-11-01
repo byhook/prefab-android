@@ -63,4 +63,24 @@ publishing {
             }
         }
     }
+    repositories {
+        maven {
+            //gradle publishPrefabPublishPublicationToReleaseRepository
+            name "release"
+            url = project.findProperty("aliyunReleaseUrl")
+            credentials {
+                username = project.findProperty("aliyunReleaseUsername")
+                password = project.findProperty("aliyunReleasePassword")
+            }
+        }
+        maven {
+            //gradle publishPrefabPublishPublicationToSnapshotRepository
+            name "snapshot"
+            url = project.findProperty("aliyunSnapshotUrl")
+            credentials {
+                username = project.findProperty("aliyunSnapshotUsername")
+                password = project.findProperty("aliyunSnapshotPassword")
+            }
+        }
+    }
 }

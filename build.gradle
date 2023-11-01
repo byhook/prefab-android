@@ -21,9 +21,30 @@ allprojects {
         mavenLocal()
         mavenCentral()
         google()
+        //阿里云镜像仓库
+        maven {
+            url 'https://maven.aliyun.com/repository/public'
+        }
+        maven {
+            url project.findProperty("aliyunReleaseUrl")
+            credentials {
+                username = project.findProperty("aliyunSnapshotUsername")
+                password = project.findProperty("aliyunSnapshotPassword")
+            }
+        }
+        maven {
+            url project.findProperty("aliyunSnapshotUrl")
+            credentials {
+                username = project.findProperty("aliyunSnapshotUsername")
+                password = project.findProperty("aliyunSnapshotPassword")
+            }
+        }
     }
 }
 
 task clean(type: Delete) {
-    delete rootProject.buildDir
+    rootProject.subprojects.forEach {
+        delete new File(it.projectDir, ".cxx")
+        delete project.buildDir
+    }
 }
