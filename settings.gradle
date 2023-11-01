@@ -2,3 +2,4 @@ rootProject.name = "prefab-android"
 include ':app'
 include ':prefab-lame'
 include ':prefab-ffmpeg'
+include ':prefab-fdk-aac'
