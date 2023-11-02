@@ -51,7 +51,7 @@ function build_lame {
     --enable-static=yes
 
   #构建并安装
-  make install
+  make -j4 install
 }
 
 ABIS=("arm64-v8a" "armeabi-v7a" "x86_64" "x86")
