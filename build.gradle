@@ -6,6 +6,10 @@ buildscript {
         mavenLocal()
         mavenCentral()
         google()
+        //阿里云镜像仓库
+        maven {
+            url 'https://maven.aliyun.com/repository/public'
+        }
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:7.2.1'
@@ -24,20 +28,6 @@ allprojects {
         //阿里云镜像仓库
         maven {
             url 'https://maven.aliyun.com/repository/public'
-        }
-        maven {
-            url project.findProperty("aliyunReleaseUrl")
-            credentials {
-                username = project.findProperty("aliyunSnapshotUsername")
-                password = project.findProperty("aliyunSnapshotPassword")
-            }
-        }
-        maven {
-            url project.findProperty("aliyunSnapshotUrl")
-            credentials {
-                username = project.findProperty("aliyunSnapshotUsername")
-                password = project.findProperty("aliyunSnapshotPassword")
-            }
         }
     }
 }
