@@ -3,15 +3,20 @@
 #参考文档
 #https://developer.android.com/ndk/guides/other_build_systems?hl=zh-cn#autoconf
 
+CURRENT_DIR=$(pwd)
 
 BUILD_DIR=$(pwd)/build
 SOURCE_CODE_DIR=$BUILD_DIR/source
 
-rm -rf $SOURCE_CODE_DIR
-mkdir -p $SOURCE_CODE_DIR
-
-#克隆代码到build目录下
-git clone https://github.com/mstorsjo/fdk-aac $SOURCE_CODE_DIR
+if [ "`ls -A $SOURCE_CODE_DIR`" = "" ]; then
+    echo "$SOURCE_CODE_DIR is empty"
+    rm -rf $SOURCE_CODE_DIR
+    mkdir -p $SOURCE_CODE_DIR
+    #克隆代码到build目录下
+    git clone https://github.com/mstorsjo/fdk-aac $SOURCE_CODE_DIR
+else
+    echo "$SOURCE_CODE_DIR is not empty"
+fi
 
 #源代码依赖了android的日志库这里会报错
 #libSBRdec/src/lpp_tran.cpp:122:10: fatal error: 'log/log.h' file not found
@@ -20,33 +25,13 @@ mkdir -p $SOURCE_CODE_DIR/libSBRdec/include/log/
 echo "void android_errorWriteLog(int i, const char *string){}" \
   > $SOURCE_CODE_DIR/libSBRdec/include/log/log.h
 
-# 根据当前机器类型选择构建工具链
-export TOOLCHAIN=$NDK_ROOT/toolchains/llvm/prebuilt/darwin-x86_64
-# export TOOLCHAIN=$NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64
-
-# 选择目标设备
-export TARGET=aarch64-linux-android
-# export TARGET=armv7a-linux-androideabi
-# export TARGET=i686-linux-android
-# export TARGET=x86_64-linux-android
-
-# 设置最低的SDK版本
-export API=21
-
-#导出环境变量
-
-export AR=$TOOLCHAIN/bin/llvm-ar
-export CC=$TOOLCHAIN/bin/$TARGET$API-clang
-export AS=$CC
-export CXX=$TOOLCHAIN/bin/$TARGET$API-clang++
-export LD=$TOOLCHAIN/bin/ld
-export RANLIB=$TOOLCHAIN/bin/llvm-ranlib
-export STRIP=$TOOLCHAIN/bin/llvm-strip
-
 function build_library {
   ABI=$1
+  HOST=$2
 
-  PREFIX_DIR=$(pwd)/../build
+  echo "build library abi:${ABI} host:${HOST}"
+
+  PREFIX_DIR=$CURRENT_DIR/../build/
   mkdir -p $PREFIX_DIR
 
   cd $SOURCE_CODE_DIR
@@ -55,7 +40,7 @@ function build_library {
 
   ./configure \
     --prefix=$PREFIX_DIR \
-    --host=$TARGET \
+    --host=$HOST \
     --bindir=$PREFIX_DIR/bin \
     --libdir=$PREFIX_DIR/libs/$ABI \
     --enable-shared=yes \
@@ -65,9 +50,14 @@ function build_library {
   make -j4 install
 }
 
+# 目前在M1的
 ABI_LIST=("arm64-v8a" "armeabi-v7a" "x86_64" "x86")
+HOST_LIST=("aarch64-linux-android" "armv7a-linux-androideabi" "x86_64-linux-android" "i686-linux-android")
 
-for abi in ${ABI_LIST[@]}; do
-  echo $abi
-  build_library $abi
+for((index=0;index<${#ABI_LIST[@]};index++));
+do
+    source $CURRENT_DIR/../setup-ndk-env.sh ${ABI_LIST[index]}
+    build_library ${ABI_LIST[index]} ${HOST_LIST[index]}
+    echo $index ${ABI_LIST[index]}
 done
+
