@@ -6,6 +6,9 @@
 #NDK_ROOT=~/Library/android/sdk/ndk/18.1.5063045
 NDK_ROOT=~/Library/android/sdk/ndk/25.2.9519653
 
+echo "setup-ndk-env abi: "$1
+
+#校验当前操作系统-目前只支持linux和macOS
 OS_NAME="$(uname -s | tr 'A-Z' 'a-z')"
 
 if [[ $OS_NAME == "darwin" ]];
@@ -33,7 +36,7 @@ function file_exit {
 #适用于NDK版本在19及以上
 function export_env_new_target {
     TARGET_ABI=$1
-    case $abi in
+    case $TARGET_ABI in
         arm64-v8a)
             TOOLCHAIN_BASE=aarch64-linux-android
         ;;
@@ -47,7 +50,7 @@ function export_env_new_target {
             TOOLCHAIN_BASE=i686-linux-android
         ;;
         *)
-            echo "Unsupported ABI."
+            echo "Unsupported ABI."$TARGET_ABI
         ;;
     esac
 }
@@ -82,7 +85,7 @@ function export_env_new {
 #适用于NDK版本在19以下
 function export_env_old_target {
     TARGET_ABI=$1
-    case $abi in
+    case $TARGET_ABI in
         arm64-v8a)
             TOOLCHAIN_BASE=aarch64-linux-android
             TOOL_NAME_BASE=aarch64-linux-android
@@ -100,7 +103,7 @@ function export_env_old_target {
             TOOL_NAME_BASE=i686-linux-android
         ;;
         *)
-            echo "Unsupported ABI."
+            echo "Unsupported ABI."$TARGET_ABI
             exit
         ;;
     esac
@@ -120,7 +123,7 @@ function export_env_old {
     export LD=${TOOLCHAIN}/bin/${TOOL_NAME_BASE}-ld
     export RANLIB=${TOOLCHAIN}/bin/${TOOL_NAME_BASE}-ranlib
     export STRIP=${TOOLCHAIN}/bin/${TOOL_NAME_BASE}-strip
-    
+
     file_exit "AR=" $AR
     file_exit "CC=" $CC
     file_exit "AS=" $AS
@@ -133,19 +136,12 @@ function export_env_old {
 #用来判断NDK版本是否为19及以上
 NDK_NEW_LLVM_CONFIG=${NDK_ROOT}/toolchains/llvm/prebuilt/${NDK_HOST_TAG}/bin/llvm-config
 
-
-ABI_LIST=("arm64-v8a" "armeabi-v7a" "x86_64" "x86")
-
-for abi in ${ABI_LIST[@]}; do
-    echo "setup abi: "$abi
-    if [ -f "${NDK_NEW_LLVM_CONFIG}" ];then
-        #NDK版本为19及以上
-        echo "ndk version >= 19"
-        export_env_new
-    else
-        #NDK版本为19以下
-        echo "ndk version < 19"
-        export_env_old
-    fi
-    echo $TARGET
-done
+if [ -f "${NDK_NEW_LLVM_CONFIG}" ];then
+    #NDK版本为19及以上
+    echo "ndk version >= 19 abi: "$1
+    export_env_new $1
+else
+    #NDK版本为19以下
+    echo "ndk version < 19 abi: "$1
+    export_env_old $1
+fi

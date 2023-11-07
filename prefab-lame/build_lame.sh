@@ -1,62 +1,57 @@
 #!/bin/sh
 
-#参考文档
-#https://developer.android.com/ndk/guides/other_build_systems?hl=zh-cn#autoconf
-
-BUILD_DIR=$(pwd)/build
+CURRENT_DIR=$(pwd)
+BUILD_DIR=$CURRENT_DIR/build
 SOURCE_CODE_DIR=$BUILD_DIR/lame-3.100
 
-rm -rf $SOURCE_CODE_DIR
-mkdir -p $SOURCE_CODE_DIR
-
-#克隆代码到build目录下
-git clone git@github.com:open-source-mirrors/lame.git -b 3.100 $SOURCE_CODE_DIR
+if [ "`ls -A $SOURCE_CODE_DIR`" = "" ]; then
+    echo "$SOURCE_CODE_DIR is empty"
+    rm -rf $SOURCE_CODE_DIR
+    mkdir -p $SOURCE_CODE_DIR
+    # 克隆代码到build目录下
+    git clone git@github.com:open-source-mirrors/lame.git -b 3.100 $SOURCE_CODE_DIR
+else
+    echo "$SOURCE_CODE_DIR is not empty"
+fi
 
 cd $SOURCE_CODE_DIR
 
-# 根据当前机器类型选择构建工具链
-export TOOLCHAIN=$NDK_ROOT/toolchains/llvm/prebuilt/darwin-x86_64
-# export TOOLCHAIN=$NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64
-
-# 选择目标设备
-export TARGET=aarch64-linux-android
-# export TARGET=armv7a-linux-androideabi
-# export TARGET=i686-linux-android
-# export TARGET=x86_64-linux-android
-
-# 设置最低的SDK版本
-export API=21
-
-#导出环境变量
-
-export AR=$TOOLCHAIN/bin/llvm-ar
-export CC=$TOOLCHAIN/bin/$TARGET$API-clang
-export AS=$CC
-export CXX=$TOOLCHAIN/bin/$TARGET$API-clang++
-export LD=$TOOLCHAIN/bin/ld
-export RANLIB=$TOOLCHAIN/bin/llvm-ranlib
-export STRIP=$TOOLCHAIN/bin/llvm-strip
-
-function build_lame {
-  ABI=$1
-
-  BUILD_DIR=$(pwd)/build/
-
-  ./configure \
+function build_library {
+    ABI=$1
+    HOST=$2
+    
+    BUILD_DIR=$CURRENT_DIR/../build/
+    mkdir -p $BUILD_DIR
+    
+    export CFLAGS="-fPIE -fPIC"
+    export LDFLAGS="-pie"
+    
+    ./configure \
+    --host=$HOST \
     --prefix=$BUILD_DIR \
-    --host=$TARGET \
     --bindir=$BUILD_DIR/bin \
     --libdir=$BUILD_DIR/libs/$ABI \
     --enable-shared=yes \
     --enable-static=yes
-
-  #构建并安装
-  make -j4 install
+    
+    #构建并安装
+    make -j4 install
 }
 
-ABIS=("arm64-v8a" "armeabi-v7a" "x86_64" "x86")
+# 目前在M1的
+# ABI_LIST=("arm64-v8a" "armeabi-v7a" "x86_64" "x86")
+# HOST_LIST=("aarch64-linux-android" "armv7a-linux-androideabi" "x86_64-linux-android" "i686-linux-android")
+ABI_LIST=("arm64-v8a" "armeabi-v7a")
+HOST_LIST=("aarch64-linux-android" "armv7a-linux-androideabi")
 
-for abi in ${ABIS[@]}; do
-  echo $abi
-  build_lame $abi
+for((index=0;index<${#ABI_LIST[@]};index++));
+do
+    source $CURRENT_DIR/../setup-ndk-env.sh ${ABI_LIST[index]}
+    build_library ${ABI_LIST[index]} ${HOST_LIST[index]}
+    echo $index ${ABI_LIST[index]}
 done
+
+
+
+
+
