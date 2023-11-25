@@ -3,8 +3,14 @@
 #参考文档
 #https://developer.android.com/ndk/guides/other_build_systems?hl=zh-cn#autoconf
 
+
+# 特别注意：
+# WSL2上 ndk23及以上会报错 checking whether the C compiler works... no
+# 在M1的MacBookPro上 x86构建会报错 用ndk22版本正常
+# 在ubuntu上面 ndk25 构建正常
+
 #NDK_ROOT=~/Library/android/sdk/ndk/18.1.5063045
-NDK_ROOT=~/Library/android/sdk/ndk/25.2.9519653
+NDK_ROOT=~/Library/android/sdk/ndk/22.1.7171670
 
 echo "setup-ndk-env abi: "$1
 
