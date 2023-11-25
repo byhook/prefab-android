@@ -39,6 +39,8 @@ function build_library {
     
     #构建并安装
     make -j4 install
+    #去掉符号信息
+    $STRIP -s $BUILD_DIR/libs/$ABI/libmp3lame.so
 }
 
 # 目前在M1的
