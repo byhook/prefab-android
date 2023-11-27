@@ -10,13 +10,13 @@ bash build_lame.sh
 #库名称：lib${LIB_NAME}.so
 LIB_NAME=lame
 #版本号：必须全数字
-VERSION=3.100.0
+LIB_VERSION=3.100.0
 
 ABIS=("arm64-v8a" "armeabi-v7a" "x86_64" "x86")
 
-TARGET_BUILD_DIR=$(pwd)/build/lame-3.100/build
+TARGET_BUILD_DIR=$(pwd)/../build
 
-TARGET_ROOT_PREFAB_DIR=$(pwd)/build/build-prefab
+TARGET_ROOT_PREFAB_DIR=$(pwd)/../build/prefab-lame
 
 rm -rf $TARGET_ROOT_PREFAB_DIR
 
@@ -34,7 +34,7 @@ function copy_libs {
   mkdir -p $TARGET_ANDROID_ABI_DIR
 
   # 复制目标文件
-  cp -R $TARGET_BUILD_DIR/libs/$TARGET_ABI/*.$SUFFIX_NAME \
+  cp $TARGET_BUILD_DIR/libs/$TARGET_ABI/*.$SUFFIX_NAME \
       $TARGET_ANDROID_ABI_DIR/lib$LIB_NAME.$SUFFIX_NAME
 
   # 生成abi.json文件
@@ -75,12 +75,12 @@ function generate_prefab {
   echo "{
     \"schema_version\": 1,
     \"name\": \"$LIB_NAME\",
-    \"version\": \"$VERSION\",
+    \"version\": \"$LIB_VERSION\",
     \"dependencies\": []
     }" >$TARGET_PREFAB_DIR/prefab.json
 
   # 复制清单文件
-  cp -R $MANIFEST_PATH $TARGET_ROOT_PREFAB_DIR/AndroidManifest.xml
+  cp $MANIFEST_PATH $TARGET_ROOT_PREFAB_DIR/AndroidManifest.xml
 }
 
 function package_library {
@@ -101,8 +101,8 @@ function package_library {
     exit 1
   fi
 
-  mkdir -p ../../aar
-  mv output.aar ../../aar
+  mkdir -p ../outputs
+  mv output.aar ../outputs/$LIB_NAME-$LIB_VERSION.aar
 }
 
 # 进入build-prefab目录

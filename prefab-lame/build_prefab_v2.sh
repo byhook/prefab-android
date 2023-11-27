@@ -8,7 +8,7 @@ bash build_lame.sh
 #库名称：lib${LIB_NAME}.so
 LIB_NAME=lame
 #版本号：必须全数字
-VERSION=3.100.0
+LIB_VERSION=3.100.0
 
 #相关版本号配置
 MIN_ABI=21
@@ -16,9 +16,9 @@ NDK_VERSION=25
 
 ABIS=("arm64-v8a" "armeabi-v7a" "x86_64" "x86")
 
-TARGET_BUILD_DIR=$(pwd)/build/lame-3.100/build
+TARGET_BUILD_DIR=$(pwd)/../build
 
-TARGET_ROOT_PREFAB_DIR=$(pwd)/build/build-prefab
+TARGET_ROOT_PREFAB_DIR=$(pwd)/../build/prefab-lame
 
 rm -rf $TARGET_ROOT_PREFAB_DIR
 
@@ -37,8 +37,11 @@ function copy_libs {
     mkdir -p $TARGET_ANDROID_ABI_DIR
 
     # 复制目标文件
-    cp -R $TARGET_BUILD_DIR/libs/$TARGET_ABI/*.$SUFFIX_NAME \
+    cp $TARGET_BUILD_DIR/libs/$TARGET_ABI/*.$SUFFIX_NAME \
       $TARGET_ANDROID_ABI_DIR/lib$LIB_NAME.$SUFFIX_NAME
+
+    echo "TARGET_ABI => "$TARGET_BUILD_DIR/libs/$TARGET_ABI
+    echo "TARGET_ANDROID_ABI_DIR => "$TARGET_ANDROID_ABI_DIR
 
     # 生成abi.json文件
     # 配置目录 prefab/modules/$libName/libs/android.$abi/abi.json
@@ -51,7 +54,6 @@ function copy_libs {
     \"static\": $STATIC
     }" > $TARGET_ANDROID_ABI_DIR/abi.json
     popd
-
 }
 
 function generate_module_json {
@@ -105,12 +107,12 @@ function generate_prefab {
     echo "{
     \"schema_version\": 2,
     \"name\": \"$LIB_NAME\",
-    \"version\": \"$VERSION\",
+    \"version\": \"$LIB_VERSION\",
     \"dependencies\": []
     }" > $TARGET_PREFAB_DIR/prefab.json
 
     # 复制清单文件
-    cp -R $MANIFEST_PATH $TARGET_ROOT_PREFAB_DIR/AndroidManifest.xml
+    cp $MANIFEST_PATH $TARGET_ROOT_PREFAB_DIR/AndroidManifest.xml
 }
 
 function package_library {
@@ -128,22 +130,16 @@ function package_library {
         exit 1
     fi
 
-    mkdir -p ../../aar
-    mv output.aar ../../aar
+    mkdir -p ../outputs
+    mv output.aar ../outputs/$LIB_NAME-$LIB_VERSION.aar
 }
 
-# 进入build-prefab目录
+# 进入prefab-lame目录
 
 pushd $TARGET_ROOT_PREFAB_DIR
 
 #生成基础配置和清单文件
 generate_prefab
-
-
-# HEADERS_DIR=$TARGET_PREFAB_DIR/modules/headers
-# mkdir -p $HEADERS_DIR
-# #拷贝头文件
-# cp -R $TARGET_BUILD_DIR/include $HEADERS_DIR
 
 #拷贝动态库
 copy_so_libs
